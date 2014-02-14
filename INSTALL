@@ -1,0 +1,7 @@
+Moth Hamster Wheel
+
+Currently this compiles in Linux out-of-the-box
+
+Techinically It should have no issues compiling with mingw, However It's reccomended to get a dll or .a file to link with. This should be in the main distro soon.
+
+
