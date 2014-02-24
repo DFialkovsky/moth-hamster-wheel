@@ -2,12 +2,6 @@
  * Daniel Fialkovsky
  * Created on 5/30/13
  * 
- * USDA ARS
- * 
- * Lisence TBD
- * 
- * 
- * 
 
 */
 
@@ -17,7 +11,6 @@
 #include <iostream> 
 #include <utility> //std::pair
 #include <vector>
-#include "templateEntry.hpp"
 #include "rawEntry.hpp"
 #include "filePrinter.hpp"
 

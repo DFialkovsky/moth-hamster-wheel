@@ -8,11 +8,15 @@
 #include <QApplication>
 
 #elif __gnu_linux__
+#if QT_VERSION <= 0x049 // if its less or equal to Qt 4.99.x // which will prolly never exist
+#include <qt4/QtGui/QApplication>
 
-// #include <qt5/QtWidgets/QApplication>
-#include <qt4/QtGui//QApplication>
+#elif QT_VERSION >= 0x0500
+#include <qt5/QtWidgets/QApplication>
 
-#endif
+#endif //linux Qt version
+
+#endif // OS
 
 // int main(int argc, char **argv) {
 //   
@@ -49,7 +53,7 @@ else
 
 #elif __gnu_linux__
     mWindow.resize( 400, 100 );
-#endif
+#endif // OS check
     mWindow.show();
 
     return a.exec();
