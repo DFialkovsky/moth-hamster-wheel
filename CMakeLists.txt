@@ -86,7 +86,7 @@ QT4_WRAP_CPP( mothHamsterWheel_GEN_MOC_HDRS ${mothHamsterWheel_MOC_HDRS} )
 
 
 
-FIND_PACKAGE(Boost COMPONENTS date_time REQUIRED)
+FIND_PACKAGE(Boost COMPONENTS date_time filesystem system REQUIRED)
 
 
 #--------------------------------------------------------------------------------
