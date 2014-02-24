@@ -3,6 +3,9 @@
 
 #ifdef __gnu_linux__
 
+
+#if QT_VERSION <= 0x049 // if its less or equal to Qt 4.99.x // which will prolly never exist
+
 #include <qt4/QtGui/QMainWindow>
 #include <qt4/QtGui/QApplication>
 #include <qt4/QtGui/QFileDialog>
@@ -22,24 +25,29 @@
 #include <qt4/QtCore/QStringList>
 #include <qt4/QtCore/QUrl>
 
-// #include <qt5/QtWidgets/QMainWindow>
-// #include <qt5/QtWidgets/QApplication>
-// #include <qt5/QtWidgets/QFileDialog>
-// #include <qt5/QtWidgets/QMessageBox>
-// #include <qt5/QtWidgets/QWidget>
-// #include <qt5/QtWidgets/QMenuBar>
-// #include <qt5/QtWidgets/QMenu>
-// #include <qt5/QtWidgets/QAction>
-// #include <qt5/QtGui/QKeySequence>
-// #include <qt5/QtWidgets/QToolButton>
-// #include <qt5/QtWidgets/QToolBar>
-// #include <qt5/QtWidgets/QStatusBar>
-// #include <qt5/QtWidgets/QCheckBox>
-// #include <qt5/QtGui/QDesktopServices>
-// 
-// #include <qt5/QtCore/QString>
-// #include <qt5/QtCore/QStringList>
-// #include <qt5/QtCore/QUrl>
+#elif QT_VERSION >= 0x0500
+
+#include <qt5/QtWidgets/QMainWindow>
+#include <qt5/QtWidgets/QApplication>
+#include <qt5/QtWidgets/QFileDialog>
+#include <qt5/QtWidgets/QMessageBox>
+#include <qt5/QtWidgets/QWidget>
+#include <qt5/QtWidgets/QMenuBar>
+#include <qt5/QtWidgets/QMenu>
+#include <qt5/QtWidgets/QAction>
+#include <qt5/QtGui/QKeySequence>
+#include <qt5/QtWidgets/QToolButton>
+#include <qt5/QtWidgets/QToolBar>
+#include <qt5/QtWidgets/QStatusBar>
+#include <qt5/QtWidgets/QCheckBox>
+#include <qt5/QtGui/QDesktopServices>
+
+#include <qt5/QtCore/QString>
+#include <qt5/QtCore/QStringList>
+#include <qt5/QtCore/QUrl>
+
+#endif // Qt Version for linux
+
 #elif _WIN32 
 
 #include <QMainWindow>
@@ -63,7 +71,7 @@
 #include <QUrl>
 
 
-#endif
+#endif // OS
 
 // #ifndef nullptr
 // #define nullptr 0

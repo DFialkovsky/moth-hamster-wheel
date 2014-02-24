@@ -21,7 +21,7 @@ void filePrinter::newFile(std::string fileName)
 {
 
   
-  std::string badchars = ":/\?\"<>*|";
+  std::string badchars = ":\?\"<>*|";
   size_t pos;
   while ((pos =fileName.find_first_of(badchars))+1 != 0) {
     fileName.erase(fileName.begin()+pos);

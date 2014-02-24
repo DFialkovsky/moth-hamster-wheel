@@ -130,7 +130,7 @@ ADD_EXECUTABLE( mothHamsterWheel MACOSX_BUNDLE WIN32
 
 #--------------------------------------------------------------------------------
 # Tell CMake which libraries we need to link our executable against.
-TARGET_LINK_LIBRARIES ( mothHamsterWheel  ${QT_LIBRARIES} ${Boost_DATE_TIME_LIBRARY} ${XLS_LIB_LIB_DIR})
+TARGET_LINK_LIBRARIES ( mothHamsterWheel  ${QT_LIBRARIES} ${Boost_LIBRARIES} ${XLS_LIB_LIB_DIR})
 
 
 
