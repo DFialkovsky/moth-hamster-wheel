@@ -18,9 +18,9 @@ bool newParser::processFile(std::string fileName)
     }
     parseIntoSections();
     DumpXlsBook();
+    DumpCSVs();
     return true;
 }
-
 
 
 // bad Line number double as a line counter which will be important to the user if fileOk turns false
@@ -91,6 +91,14 @@ void newParser::copyFileToMem(std::string fileName, bool fileOk, unsigned int ba
   
 }
 
+void newParser::DumpRaws()
+{
+    for (int i = 0; i < cylinderList_.size(); i++)
+    {
+	dataEntries_[i].printRawData();
+    }
+}
+
 
 void newParser::parseIntoSections()
 {
@@ -136,6 +144,15 @@ void newParser::removeReturnCarraiges(std::string& subjectedStr)
 		
 }
 
+void newParser::DumpCSVs()
+{
+    for (int i = 0; i < cylinderList_.size(); i++)
+    {
+	dataEntries_[i].printProcessedDataCSV();
+    }
+}
+
+
 void newParser::DumpXlsBook()
 {
 //     std::vector<xlslib_core::worksheet*> worksheets;
@@ -154,8 +171,8 @@ void newParser::DumpXlsBook()
     }
     std::string varianceAvgSpeed, varianceDistanceCvrd, varianceTimeElpsd;
     
-    boost::posix_time::ptime time(boost::posix_time::second_clock::local_time());
-    std::string currentTime = boost::posix_time::to_simple_string(time);
+    boost::posix_time::ptime Sectime(boost::posix_time::second_clock::local_time());
+    std::string currentTime = boost::posix_time::to_simple_string(Sectime);
     for (int i = 0; i < cylinderCount; i++)
     {
 
@@ -225,7 +242,30 @@ void newParser::DumpXlsBook()
 	
 	
     }
-    wb.Dump("test.xls");
+
+/** -----------------------figure out current system time ------------------------**/
+    boost::posix_time::ptime time(boost::posix_time::microsec_clock::local_time());
+    std::string timeStr = boost::posix_time::to_simple_string(time);
+    std::size_t loc;
+    while ((loc = timeStr.find(':')) != std::string::npos) 
+    {
+	    timeStr.erase(timeStr.begin()+loc);
+    }
+/** -----------------------folder creation and file writing-----------------------**/
+
+    boost::filesystem::path currentPath("dumps");
+    boost::filesystem::create_directory(currentPath);
+
+    std::string fileName = currentPath.string();
+#ifdef __gnu_linux__
+    fileName += "/";
+#elif _WIN32
+    fileName += "\\";
+#endif
+    fileName.reserve(37); // the string size should be around this size
+    fileName += timeStr;
+    fileName += ".xls";
+    wb.Dump(fileName);
 }
 
 

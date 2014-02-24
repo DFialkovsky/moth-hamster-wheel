@@ -95,7 +95,7 @@ void mainWindow::openFile()
  
     newParser P;
     P.processFile(fileName.toStdString());
-    
+    P.DumpRaws();
     
     QString folder = fileName;
     int index = folder.lastIndexOf("/");
@@ -107,7 +107,6 @@ void mainWindow::openFile()
 
 	QDir::toNativeSeparators(QApplication::applicationDirPath());
 	QDesktopServices::openUrl(QUrl(folder));
-	
     }
 }
 

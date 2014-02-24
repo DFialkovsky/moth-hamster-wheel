@@ -22,6 +22,8 @@
 #include <string>
 #include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/filesystem.hpp>
 #include <fstream>
 #include <ostream>
 #include <iostream>
@@ -52,8 +54,14 @@ public:
     bool processFile(std::string fileName);
     void DumpEverything();
     
-    void DumpXlsBook();
     
+    // emits a xls file with the parsed data into in dumps/xls/
+    // dumps/xls/ is created if it doesn't exist.
+    void DumpXlsBook();
+    // emits x csv files with the parsed data into in dumps/csv/
+    // where x is the amount of unique sources in the given file
+    // dumps/xls/ is created if it doesn't exist.
+    void DumpCSVs();
     // dumps only the raw generated data used to create the spreadsheets
     void DumpRaws();
     

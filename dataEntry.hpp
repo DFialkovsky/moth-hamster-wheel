@@ -17,13 +17,15 @@
 #include <iostream> 
 #include <utility> //std::pair
 #include <vector>
-
+#include "templateEntry.hpp"
 #include "rawEntry.hpp"
 #include "filePrinter.hpp"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/math/constants/constants.hpp>
+#include <boost/math/constants/constants.hpp> // pi
 #include <boost/date_time/posix_time/posix_time.hpp>
+
+#include <boost/filesystem.hpp>
 
 #include "xlslib/xlslib.h"
 typedef rawEntry 		timeEntry;
@@ -63,15 +65,27 @@ public:
     ~dataEntry();
   
 public:
+    // Move data (ID, size\n) into the dataEntry object.
+    // input non-empty, initialized vector of timeEntries
     void getFullDataSheet(std::vector<timeEntry> & dataSheet);
+    
+    // sets the ID of this object to an integer, cylinder. This will be used when printing data files
     void setCylinderNum(int cylinder);
+    // sets the radius variable to the double, radius.
+    // used for computing the outputs
     void setRadius(double radius);
+    // clear and reset everything in this type.
     void reset();
+    // prints the contents of the primary raw data through stdout
     void printBlob();
+    // prints the contents of the primary raw data into a file
+    // this file is located in the ./raw folder. It will be created if it doesn't exist.
     void printRawData();
     // print all of the data generated that lives in memory into a comma delinated csv file
+    // this file will be located in dumps/csv/
     void printProcessedDataCSV();
     // print all of the data generated that lives in memory into an xls file using xlslib
+    // this file will be located in dumps/xls/
     void printProcessedDataXLS();
     // this will find the first entry in the vector that contains both zero's 
     // in the timeEntry slot
@@ -105,6 +119,8 @@ private:
     double 			getFlightSpeedOnRotation(double timeFirst, double timeLast);
     void 			fillBoutEntry(int begin, int end);
     double 			avgSpeedVaraince();
+    // in linux adds a '/', in windows adds a '\\' to the string
+    inline static void 		addFolderCharTo(std::string & subjectedStr);
 };
 
 

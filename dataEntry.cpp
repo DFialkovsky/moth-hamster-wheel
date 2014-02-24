@@ -17,6 +17,16 @@ dataEntry::dataEntry(int cylinder, double radius)
 }
 
 
+void dataEntry::addFolderCharTo(std::string& subjectedStr)
+{
+#ifdef __gnu_linux__
+    subjectedStr += "/";
+#elif _WIN32
+    subjectedStr += "\\";
+#endif
+}
+
+
 
 void dataEntry::getFullDataSheet(std::vector< timeEntry > & dataSheet)
 {
@@ -222,54 +232,6 @@ double dataEntry::getFlightSpeedOnRotation(double timeFirst, double timeLast)
   
 }
 
-
-// this function will figure out how many lines each bout consisted of in the given cylinder run. 
-// 
-// void dataEntry::computeBouts()
-// {
-//   twoUInts temp;
-//   std::pair<int, int> vectorRange;
-//   //std::vector <twoUInts> rangeList;
-//   unsigned int lineNum(0);
-//   bool isNewBout(true);
-//   while (lineNum < sizeofDataSheet_) 
-//   {
-// 	if (isNewBout) 
-// 	{
-// 	  isNewBout = false;
-// 	  temp.first = localDataSheet_[lineNum].getMilliseconds();
-// 	  vectorRange.first = lineNum;
-// 	}
-// 	// if the next line exists, and the difference is over a minute
-// // 	std::cerr << "diff (" << lineNum << ") " << localDataSheet_[lineNum+1].getMilliseconds() - localDataSheet_[lineNum].getMilliseconds() 
-// // 		  << " 1st: " << temp.first << " 2nd: " << temp.second << "ran(" << bool(lineNum +1 < sizeofDataSheet_) << ")\n";
-// // 30+1 < 31 || 30 == 31-1
-// 	if ((lineNum +1 < sizeofDataSheet_ || lineNum == sizeofDataSheet_-1) && 
-// 	  localDataSheet_[lineNum+1].getMilliseconds() - localDataSheet_[lineNum].getMilliseconds() > LENGTH_OF_BOUT) 
-// 	{
-// 	  temp.second = localDataSheet_[lineNum].getMilliseconds();
-// 	  vectorRange.second = lineNum;
-// 	  if (vectorRange.second -  vectorRange.first > 0) {
-// 		//rangeList.push_back(vectorRange);
-// 		fillBoutEntry(vectorRange.first, vectorRange.second);
-// // // 		std::cerr << "start: "  << vectorRange.first << " end: " << vectorRange.second <<  "\n"
-// // // 			  << lineNum << ") first: " << temp.first << " 2nd: " << temp.second << "\n"; 
-// 		boutTimeRanges_.push_back(vectorRange);
-// 		vectorRange.first = 0;
-// 		vectorRange.second = 0;
-// 	  } // end if 
-// 
-// 	  // if the above if statement failed, then the bout is empty, set a new bout
-// 	  isNewBout = true;
-// 	   // end else
-// 	}
-// 	++lineNum;
-// 	
-//    } // end while
-//    std::cerr << "linnum: " << lineNum << "\n";
-// }
-
-
 void dataEntry::computeBouts()
 {
   twoUInts temp;
@@ -285,17 +247,14 @@ void dataEntry::computeBouts()
 	    vectorRange.first = lineNum;
 	}
 	// if the next line exists, and the difference is over a minute
-// 	if ((lineNum +1 < sizeofDataSheet_ || lineNum == sizeofDataSheet_-1) && 
-// 	  localDataSheet_[lineNum+1].getMilliseconds() - localDataSheet_[lineNum].getMilliseconds() > LENGTH_OF_BOUT) 
-
 	if (lineNum +1 <= sizeofDataSheet_)
 	{
 	    if(localDataSheet_[lineNum+1].getMilliseconds() - localDataSheet_[lineNum].getMilliseconds() > LENGTH_OF_BOUT)
 	    {
 		temp.second = localDataSheet_[lineNum].getMilliseconds();
 		vectorRange.second = lineNum;
+		 
 		if (vectorRange.second -  vectorRange.first > 0) {
-		    //rangeList.push_back(vectorRange);
 		    fillBoutEntry(vectorRange.first, vectorRange.second);
 	// // 		std::cerr << "start: "  << vectorRange.first << " end: " << vectorRange.second <<  "\n"
 	// // 			  << lineNum << ") first: " << temp.first << " 2nd: " << temp.second << "\n"; 
@@ -311,7 +270,6 @@ void dataEntry::computeBouts()
 	++lineNum;
 
     } // end while
-	std::cerr << "linnum: " << lineNum << "\n";    
     
 }
 
@@ -322,11 +280,8 @@ void dataEntry::generateTimeForFileName()
   fileToWrite_ = boost::posix_time::to_simple_string(time);
   std::size_t loc;
   while ((loc = fileToWrite_.find(':')) != std::string::npos) {
-	loc = fileToWrite_.find(':');
 	fileToWrite_.erase(fileToWrite_.begin()+loc);
-  }
-  fileToWrite_+= ".txt";
-  
+  }  
 }
 
 
@@ -369,81 +324,98 @@ void dataEntry::fillBoutEntry(int begin, int end)
 
 void dataEntry::printRawData()
 {
-  filePrinter printer;
-  printer.newFile(fileToWrite_);
-  std::stringstream sstream;
-  sstream << "Cylinder Milliseconds\n";
-  // the writeStream must accept a converted stringstream, I have NO CLUE why it cant take a std::string from a Cstr
-  std::string str = sstream.str();
-  sstream.str(std::string());
-  printer.writeLine(str);
-  for (int i = 0; i < localDataSheet_.size(); i++) 
-  {
-    sstream << localDataSheet_[i].getNumber() << ",\t" << localDataSheet_[i].getMilliseconds() << "\n";
-    str = sstream.str();
+    filePrinter printer;
+    boost::filesystem::path currentPath("raws");
+    boost::filesystem::create_directory(currentPath);
+    std::string fileName = currentPath.string();
+#ifdef __gnu_linux__
+    fileName+= "/";
+#elif _WIN32
+    fileName += "\\";
+#endif
+    fileName += fileToWrite_;
+    std::cerr << "\n\n" << fileName << "\n";
+    printer.newFile(fileName);
+    std::stringstream sstream;
+    sstream << "Cylinder Milliseconds\n";
+    // the writeStream must accept a converted stringstream, I have NO CLUE why it cant take a std::string from a Cstr
+    std::string str = sstream.str();
     sstream.str(std::string());
     printer.writeLine(str);
-  }
+    for (int i = 0; i < localDataSheet_.size(); i++) 
+    {
+	sstream << localDataSheet_[i].getNumber() << ",\t" << localDataSheet_[i].getMilliseconds() << "\n";
+	str = sstream.str();
+	sstream.str(std::string());
+	printer.writeLine(str);
+    }
 
 }
 
 void dataEntry::printProcessedDataCSV()
 {
-  computeBouts();
+    computeBouts();
+    
+    boost::filesystem::path currentPath("dumps");
+    boost::filesystem::create_directory(currentPath);
 
-  std::string frontFileName = "P";
-  frontFileName.append(boost::lexical_cast<std::string>(cylinderNum_));
-  frontFileName += "-";
-  frontFileName += fileToWrite_;
-  filePrinter dataPrinter;
-  dataPrinter.newFile(frontFileName);
-  
-  std::stringstream sstream;
-  sstream << "Bout Range, Laps, Distance Covered(cm), Var.distCvrd, Avg Speed, Var.AvgSpd, Time Elapsed, Var.TimeElpsd\n";
-  std::string str = sstream.str();
-  sstream.str(std::string()); // clear the stringsteam
-  dataPrinter.writeLine(str);
-  
-  unsigned int totalBouts = bouts_.size();
-
-  
-  std::string varianceAvgSpeed, varianceDistanceCvrd, varianceTimeElpsd;
-  
-  varianceDistanceCvrd = "=VAR(C2:C";
-  varianceDistanceCvrd += boost::lexical_cast<std::string>(bouts_.size()+1);
-  varianceDistanceCvrd += ")";
-  
-  varianceAvgSpeed = "=VAR(E2:E";
-  varianceAvgSpeed += boost::lexical_cast<std::string>(bouts_.size()+1);
-  varianceAvgSpeed += ")";
-
-  varianceTimeElpsd = "=VAR(G2:G";
-  varianceTimeElpsd += boost::lexical_cast<std::string>(bouts_.size()+1);
-  varianceTimeElpsd += ")";
-  
-  
-  sstream << bouts_[0].entryRange.first << ":" << bouts_[0].entryRange.second << ","
-	  << bouts_[0].laps << ","
-	  << bouts_[0].distanceCovered << "," << varianceDistanceCvrd << ","
-	  << bouts_[0].avgSpeed << "," << varianceAvgSpeed << ","
-	  << bouts_[0].timeElapsed << "," << varianceTimeElpsd << ",\n";
-    str = sstream.str();
-    sstream.str(std::string());
+    std::string fileName = currentPath.string();
+    addFolderCharTo(fileName); // add '/' or '\\' depending on platform
+    fileName.reserve(46); // the string size should be around this size
+    fileName+= "Cylinder-";
+    fileName.append(boost::lexical_cast<std::string>(cylinderNum_));
+    fileName += "-";
+    fileName += fileToWrite_;
+    fileName += ".csv";
+    filePrinter dataPrinter;
+    dataPrinter.newFile(fileName);
+    
+    std::stringstream sstream;
+    sstream << "Bout Range, Laps, Distance Covered(cm), Var.distCvrd, Avg Speed, Var.AvgSpd, Time Elapsed, Var.TimeElpsd\n";
+    std::string str = sstream.str();
+    sstream.str(std::string()); // clear the stringsteam
     dataPrinter.writeLine(str);
-  for (unsigned int i = 1; i < totalBouts; i++)  
-  {
-    sstream << bouts_[i].entryRange.first << ":" << bouts_[i].entryRange.second << ","
-	    << bouts_[i].laps << "," << bouts_[i].distanceCovered << ",,"
-	    << bouts_[i].avgSpeed << ",,"
-	    << bouts_[i].timeElapsed << ",," << "\n";
-    str = sstream.str();
-    sstream.str(std::string());
-    dataPrinter.writeLine(str);
+    
+    unsigned int totalBouts = bouts_.size();
 
     
-  } // end for
-  
-  
+    std::string varianceAvgSpeed, varianceDistanceCvrd, varianceTimeElpsd;
+    
+    varianceDistanceCvrd = "=VAR(C2:C";
+    varianceDistanceCvrd += boost::lexical_cast<std::string>(bouts_.size()+1);
+    varianceDistanceCvrd += ")";
+    
+    varianceAvgSpeed = "=VAR(E2:E";
+    varianceAvgSpeed += boost::lexical_cast<std::string>(bouts_.size()+1);
+    varianceAvgSpeed += ")";
+
+    varianceTimeElpsd = "=VAR(G2:G";
+    varianceTimeElpsd += boost::lexical_cast<std::string>(bouts_.size()+1);
+    varianceTimeElpsd += ")";
+    
+    
+    sstream << bouts_[0].entryRange.first << ":" << bouts_[0].entryRange.second << ","
+	    << bouts_[0].laps << ","
+	    << bouts_[0].distanceCovered << "," << varianceDistanceCvrd << ","
+	    << bouts_[0].avgSpeed << "," << varianceAvgSpeed << ","
+	    << bouts_[0].timeElapsed << "," << varianceTimeElpsd << ",\n";
+	str = sstream.str();
+	sstream.str(std::string());
+	dataPrinter.writeLine(str);
+    for (unsigned int i = 1; i < totalBouts; i++)  
+    {
+	sstream << bouts_[i].entryRange.first << ":" << bouts_[i].entryRange.second << ","
+		<< bouts_[i].laps << "," << bouts_[i].distanceCovered << ",,"
+		<< bouts_[i].avgSpeed << ",,"
+		<< bouts_[i].timeElapsed << ",," << "\n";
+	str = sstream.str();
+	sstream.str(std::string());
+	dataPrinter.writeLine(str);
+
+	
+    } // end for
+    
+    
 }
 
 
@@ -466,45 +438,49 @@ void dataEntry::printProcessedDataXLS()
     sh->colwidth(7,4000);
     unsigned int totalBouts = bouts_.size();
 
-std::string varianceAvgSpeed, varianceDistanceCvrd, varianceTimeElpsd;
-  
-  varianceDistanceCvrd = "=VAR(C2:C";
-  varianceDistanceCvrd += boost::lexical_cast<std::string>(bouts_.size()+1);
-  varianceDistanceCvrd += ")";
-  
-  varianceAvgSpeed = "=VAR(E2:E";
-  varianceAvgSpeed += boost::lexical_cast<std::string>(bouts_.size()+1);
-  varianceAvgSpeed += ")";
+    std::string varianceAvgSpeed, varianceDistanceCvrd, varianceTimeElpsd;
+    
+    varianceDistanceCvrd = "=VAR(C2:C";
+    varianceDistanceCvrd += boost::lexical_cast<std::string>(bouts_.size()+1);
+    varianceDistanceCvrd += ")";
+    
+    varianceAvgSpeed = "=VAR(E2:E";
+    varianceAvgSpeed += boost::lexical_cast<std::string>(bouts_.size()+1);
+    varianceAvgSpeed += ")";
 
-  varianceTimeElpsd = "=VAR(G2:G";
-  varianceTimeElpsd += boost::lexical_cast<std::string>(bouts_.size()+1);
-  varianceTimeElpsd += ")";  
+    varianceTimeElpsd = "=VAR(G2:G";
+    varianceTimeElpsd += boost::lexical_cast<std::string>(bouts_.size()+1);
+    varianceTimeElpsd += ")";  
 
-  
-  std::string entryRange;
+    
+    std::string entryRange;
 
-  for (unsigned int i = 0; i < bouts_.size(); i++)
-  {
-      entryRange = boost::lexical_cast<std::string>(bouts_[i].entryRange.first);
-      entryRange += ':';
-      entryRange += boost::lexical_cast<std::string>(bouts_[i].entryRange.second);
-      
-      sh->label(i+1, 0, entryRange);
-      
-      sh->number(i+1, 1, bouts_[i].laps);
-      
-      sh->number(i+1, 2, bouts_[i].distanceCovered);
-      
-      sh->number(i+1, 4, bouts_[i].avgSpeed);
+    for (unsigned int i = 0; i < bouts_.size(); i++)
+    {
+	entryRange = boost::lexical_cast<std::string>(bouts_[i].entryRange.first);
+	entryRange += ':';
+	entryRange += boost::lexical_cast<std::string>(bouts_[i].entryRange.second);
+	
+	sh->label(i+1, 0, entryRange);
+	
+	sh->number(i+1, 1, bouts_[i].laps);
+	
+	sh->number(i+1, 2, bouts_[i].distanceCovered);
+	
+	sh->number(i+1, 4, bouts_[i].avgSpeed);
 
-      sh->number(i+1, 6, bouts_[i].timeElapsed);
-  }
-  std::string frontFileName = "P";
-  frontFileName.append(boost::lexical_cast<std::string>(cylinderNum_));
-  frontFileName += "-";
-  frontFileName += fileToWrite_.substr(0, fileToWrite_.size()-3); // remove the .txt // TODO this must be depricated
-  frontFileName += "xls";
-  wb.Dump(frontFileName);
+	sh->number(i+1, 6, bouts_[i].timeElapsed);
+    }
+    boost::filesystem::path currentPath("dumps");
+    boost::filesystem::create_directory(currentPath);
+    std::string fileName = currentPath.string();
+    addFolderCharTo(fileName); // add '/' or '\\' depending on platform
+    fileName.reserve(37); // the string size should be around this size
+    fileName.append(boost::lexical_cast<std::string>(cylinderNum_));
+    fileName += "-";
+    fileName += fileToWrite_;
+    fileName += ".xls";
+    wb.Dump(fileName);
 }
 
 
