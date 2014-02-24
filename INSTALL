@@ -1,7 +1,22 @@
 Moth Hamster Wheel
 
+
+
+linux instructions:
+#cmake CMakeLists.txt
+#make
+./mothHamsterWheel locally from there
+
+windows mingw instructions: --NOTE: this is not supported yet!
+
+set your local user PATH to your mingw/bin folder. Add it if it doesnt exist
+#cmake CMakeLists.txt -G "MinGW Makefiles"
+#mingw32-make
+
+
 Currently this compiles in Linux out-of-the-box
 
-Techinically It should have no issues compiling with mingw, However It's reccomended to get a dll or .a file to link with. This should be in the main distro soon.
+Techinically It should have no issues compiling with mingw,
+ However It's reccomended to get a dll or .a file to link with. This should be in the main distro soon.
 
 
