@@ -113,7 +113,6 @@ private:
     void 			fillBoutEntry(int begin, int end);
     double 			avgSpeedVaraince();
     // in linux adds a '/', in windows adds a '\\' to the string
-    inline static void 		addFolderCharTo(std::string & subjectedStr);
 };
 
 

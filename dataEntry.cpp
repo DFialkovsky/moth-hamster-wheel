@@ -17,16 +17,6 @@ dataEntry::dataEntry(int cylinder, double radius)
 }
 
 
-void dataEntry::addFolderCharTo(std::string& subjectedStr)
-{
-#ifdef __gnu_linux__
-    subjectedStr += "/";
-#elif _WIN32
-    subjectedStr += "\\";
-#endif
-}
-
-
 
 void dataEntry::getFullDataSheet(std::vector< timeEntry > & dataSheet)
 {
@@ -330,7 +320,7 @@ void dataEntry::printRawData()
     boost::filesystem::create_directory(currentPath);
     std::string fileName = currentPath.string();
     fileName.reserve(47); // expected size is 45-47
-    addFolderCharTo(fileName);
+    fileName += "/";
     fileName += "Raw-Cylinder-";
     fileName += boost::lexical_cast<std::string>( cylinderNum_);
     fileName += "-";
@@ -362,7 +352,7 @@ void dataEntry::printProcessedDataCSV()
     boost::filesystem::create_directory(currentPath);
 
     std::string fileName = currentPath.string();
-    addFolderCharTo(fileName); // add '/' or '\\' depending on platform
+    fileName += "/";
     fileName.reserve(48); // expected size is 46-48
     fileName+= "Cylinder-";
     fileName.append(boost::lexical_cast<std::string>(cylinderNum_));
@@ -476,7 +466,7 @@ void dataEntry::printProcessedDataXLS()
     boost::filesystem::path currentPath("dumps");
     boost::filesystem::create_directory(currentPath);
     std::string fileName = currentPath.string();
-    addFolderCharTo(fileName); // add '/' or '\\' depending on platform
+    fileName += "/";
     fileName.reserve(39); // expected size is 37-39
     fileName.append(boost::lexical_cast<std::string>(cylinderNum_));
     fileName += "-";

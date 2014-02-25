@@ -258,12 +258,7 @@ void newParser::DumpXlsBook()
 
     std::string fileName = currentPath.string();
     fileName.reserve(37); // the string size should be around this size
-
-#ifdef __gnu_linux__
     fileName += "/";
-#elif _WIN32
-    fileName += "\\";
-#endif
     fileName += timeStr;
     fileName += ".xls";
     wb.Dump(fileName);
