@@ -106,7 +106,7 @@ private:
     boutEntries			bouts_;		
     boutVarienceEntries		varianceBouts_;
     std::vector <twoUInts>	boutTimeRanges_;
-    std::string 		fileToWrite_;
+    std::string 		currentTimeStr_;
 private:
     void 			generateTimeForFileName();
     double 			getFlightSpeedOnRotation(double timeFirst, double timeLast);
