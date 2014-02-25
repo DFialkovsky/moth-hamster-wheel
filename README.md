@@ -6,7 +6,7 @@ Currently a work in progress.
 
 How it works:
 
-See example.csv for an example of proper file format (ID,[millisecond timestamp])
+See example.csv for an example of proper file format ([millisecond timestamp],ID)
 
 This will emit a test.xls file with data regarding bouts (per 60 seconds) and some more statistics.
 

@@ -277,10 +277,10 @@ void dataEntry::computeBouts()
 void dataEntry::generateTimeForFileName()
 {
   boost::posix_time::ptime time(boost::posix_time::microsec_clock::local_time());
-  fileToWrite_ = boost::posix_time::to_simple_string(time);
+  currentTimeStr_ = boost::posix_time::to_simple_string(time);
   std::size_t loc;
-  while ((loc = fileToWrite_.find(':')) != std::string::npos) {
-	fileToWrite_.erase(fileToWrite_.begin()+loc);
+  while ((loc = currentTimeStr_.find(':')) != std::string::npos) {
+	currentTimeStr_.erase(currentTimeStr_.begin()+loc);
   }  
 }
 
@@ -314,28 +314,30 @@ void dataEntry::fillBoutEntry(int begin, int end)
   bEntry.timeElapsed = *(--entry.end()) - (*entry.begin());
   bEntry.entryRange.first = begin;
   bEntry.entryRange.second = end;
-  std::cerr << "laps: " << bEntry.laps << " distanceCovered: " << bEntry.distanceCovered << " avgSpeed: "
-	    << bEntry.avgSpeed << " timeElapsed: " << bEntry.timeElapsed << " last entry: " <<entry.back() <<  "\n";
+//   std::cerr << "laps: " << bEntry.laps << " distanceCovered: " << bEntry.distanceCovered << " avgSpeed: "
+// 	    << bEntry.avgSpeed << " timeElapsed: " << bEntry.timeElapsed << " last entry: " <<entry.back() <<  "\n";
  
   bouts_.push_back(bEntry);
-  std::cerr << "bouts size: " << bouts_.size() << "\n";
+//   std::cerr << "bouts size: " << bouts_.size() << "\n";
 }
 
 
 void dataEntry::printRawData()
 {
+    /**-----------setup file to print------------**/
     filePrinter printer;
     boost::filesystem::path currentPath("raws");
     boost::filesystem::create_directory(currentPath);
     std::string fileName = currentPath.string();
-#ifdef __gnu_linux__
-    fileName+= "/";
-#elif _WIN32
-    fileName += "\\";
-#endif
-    fileName += fileToWrite_;
-    std::cerr << "\n\n" << fileName << "\n";
+    fileName.reserve(47); // expected size is 45-47
+    addFolderCharTo(fileName);
+    fileName += "Raw-Cylinder-";
+    fileName += boost::lexical_cast<std::string>( cylinderNum_);
+    fileName += "-";
+    fileName += currentTimeStr_;
     printer.newFile(fileName);
+    /**-----------file writing------------**/
+
     std::stringstream sstream;
     sstream << "Cylinder Milliseconds\n";
     // the writeStream must accept a converted stringstream, I have NO CLUE why it cant take a std::string from a Cstr
@@ -361,11 +363,11 @@ void dataEntry::printProcessedDataCSV()
 
     std::string fileName = currentPath.string();
     addFolderCharTo(fileName); // add '/' or '\\' depending on platform
-    fileName.reserve(46); // the string size should be around this size
+    fileName.reserve(48); // expected size is 46-48
     fileName+= "Cylinder-";
     fileName.append(boost::lexical_cast<std::string>(cylinderNum_));
     fileName += "-";
-    fileName += fileToWrite_;
+    fileName += currentTimeStr_;
     fileName += ".csv";
     filePrinter dataPrinter;
     dataPrinter.newFile(fileName);
@@ -475,10 +477,10 @@ void dataEntry::printProcessedDataXLS()
     boost::filesystem::create_directory(currentPath);
     std::string fileName = currentPath.string();
     addFolderCharTo(fileName); // add '/' or '\\' depending on platform
-    fileName.reserve(37); // the string size should be around this size
+    fileName.reserve(39); // expected size is 37-39
     fileName.append(boost::lexical_cast<std::string>(cylinderNum_));
     fileName += "-";
-    fileName += fileToWrite_;
+    fileName += currentTimeStr_;
     fileName += ".xls";
     wb.Dump(fileName);
 }
