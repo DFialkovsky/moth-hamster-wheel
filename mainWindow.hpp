@@ -20,6 +20,7 @@
 #include <qt4/QtGui/QStatusBar>
 #include <qt4/QtGui/QCheckBox>
 #include <qt4/QtGui/QDesktopServices>
+#include <qt4/QtGui/QErrorMessage>
 
 #include <qt4/QtCore/QString>
 #include <qt4/QtCore/QStringList>
@@ -41,6 +42,7 @@
 #include <qt5/QtWidgets/QStatusBar>
 #include <qt5/QtWidgets/QCheckBox>
 #include <qt5/QtGui/QDesktopServices>
+#include <qt5/QtWidgets/QErrorMessage>
 
 #include <qt5/QtCore/QString>
 #include <qt5/QtCore/QStringList>
@@ -65,6 +67,7 @@
 
 #include <QCheckBox>
 #include <QDesktopServices>
+#include <QErrorMessage>
 
 #include <QString>
 #include <QStringList>
@@ -78,7 +81,7 @@
 // #endif
 
 #include "newParser.hpp"
-
+#include <utility> // std::pair
 static const QString HAMSTER_VERSION = "0.1.2";
 
 class mainWindow : public QMainWindow {
@@ -103,6 +106,7 @@ private:
     void 		createActions();
     void 		generateMenu();
     
+    bool 		ifErrorsEvaluate(std::pair<int, unsigned int> msg);
 private: //datastructures
     //QStringList 	outputFileList_;
     

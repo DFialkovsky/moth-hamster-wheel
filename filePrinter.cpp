@@ -34,42 +34,7 @@ void filePrinter::newFile(std::string fileName)
   }
 }
 
-void filePrinter::newFile_from_date()
-{
 
-  boost::posix_time::ptime time(boost::posix_time::microsec_clock::local_time());
-  std::string str = boost::posix_time::to_simple_string(time);
-  size_t loc;
-  while ((loc = str.find(':')) != std::string::npos) {
-    size_t loc = str.find(':');
-    str.erase(str.begin()+loc);
-  }
-  str.append(".txt");
-  fileName_ = str;
-  
-}
-
-
-void filePrinter::newFile_from_date(std::string extraInFront)
-{
-  std::string badchars = ":/\?\"<>*|";
-  uint32_t pos;
-  while ((pos =extraInFront.find_first_of(badchars))+1 != 0) {
-    extraInFront.erase(extraInFront.begin()+pos);
-    
-  }
-  
-  boost::posix_time::ptime time(boost::posix_time::microsec_clock::local_time());
-  std::string str = boost::posix_time::to_simple_string(time);
-  size_t loc;
-  while ((loc = str.find(':')) != std::string::npos) {
-  size_t loc = str.find(':');
-  str.erase(str.begin()+loc);
-  }
-  str.append(".txt");
-  extraInFront += str;
-  fileName_ = extraInFront;
-}
 
 
 void filePrinter::writeLine(std::string str)

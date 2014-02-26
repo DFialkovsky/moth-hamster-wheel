@@ -6,25 +6,24 @@ newParser::newParser(): curFileName_()
 
 }
 
-bool newParser::processFile(std::string fileName)
+std::pair<int,unsigned int> newParser::processFile(std::string fileName)
 {
-    bool ok(true);
     unsigned int errLineNum(0);
-    copyFileToMem(fileName,ok,errLineNum);
-    if (!ok)
+    int outputStatus = copyFileToMem(fileName,errLineNum);
+    if (outputStatus) // if !=0
     {
 	// TODO: display error message
-	return false;
+	return std::pair<int, unsigned int> (outputStatus, errLineNum);
     }
     parseIntoSections();
     DumpXlsBook();
     DumpCSVs();
-    return true;
+    return std::pair<int, unsigned int> (FILE_OK,0);
 }
 
 
 // bad Line number double as a line counter which will be important to the user if fileOk turns false
-void newParser::copyFileToMem(std::string fileName, bool fileOk, unsigned int badLineNumber)
+int newParser::copyFileToMem(std::string fileName, unsigned int & badLineNumber)
 {
   std::ifstream fileStream;
   std::string buffer;
@@ -32,6 +31,10 @@ void newParser::copyFileToMem(std::string fileName, bool fileOk, unsigned int ba
   timeEntry tempEntry;
   int cylinderInt(0);
   unsigned int timeInt(0);
+  
+  int prevCylinderInt(0);
+  int prevtimeInt(0);
+  bool pastFirstIteration(false);
   // these are the tokens that will seperte each entry
   
   boost::char_separator<char> seperators(" ,\t");
@@ -44,7 +47,7 @@ void newParser::copyFileToMem(std::string fileName, bool fileOk, unsigned int ba
 	    // if a windows return carraige character exists,  remove it to make the output portable to 
 	    // to UNIX-like operating systems
 
-	    #ifndef WIN32_ // if windows not defined
+	    #ifndef _WIN32 // if windows not defined
 	    removeReturnCarraiges(buffer);
 	    #endif
 	    
@@ -57,16 +60,21 @@ void newParser::copyFileToMem(std::string fileName, bool fileOk, unsigned int ba
 		continue;
 	    time =  *(tok);
 	    ++tok;
-	    if (tok == tokens.end())
+	    
+	    if (tok == tokens.end()) // check if line only has 1 entry instead of 2.
 	    {
-		fileOk = false; // let user decide if bad file is acceptable
-		return;
+		return ERR_1ENTRY_PER_LINE;
 	    }
 	    cylinder = *(tok);
-	    if (++tok != tokens.end()) // there are too many contents in a single line
+	    
+	    if (++tok != tokens.end()) // there are too many contents in a single line.
 	    {
-		fileOk = false;
-		return;
+		return ERR_3PLUS_ENTRES_PER_LINE;
+	    }
+	    
+	    if (!(isNumber(cylinder) || isNumber(time))) // if either section contains non letters
+	    {
+		return ERR_TOXIC_CHARACTER;
 	    }
 	    cylinderInt = boost::lexical_cast<int>(cylinder);
 	    timeInt = boost::lexical_cast<unsigned int>(time);
@@ -76,19 +84,32 @@ void newParser::copyFileToMem(std::string fileName, bool fileOk, unsigned int ba
 	    if (find_first_of(cylinderInt, cylinderList_) == MAX_UINT32) {
 		cylinderList_.push_back(cylinderInt);
 	    }
-
+	    if (pastFirstIteration)
+	    {
+		if (prevtimeInt > timeInt ) // if the millisecond clock is broken, then the data is probably bad.
+		    return ERR_MILLIS_SHRUNK;
+		
+		if (prevtimeInt == timeInt && prevCylinderInt == cylinderInt) // if there is an exact repeat, the entry.
+		    continue;
+	    }
+	    prevCylinderInt = cylinderInt;
+	    prevtimeInt = timeInt;
+	    
+	    
 	    tempEntry.setNumber(cylinderInt);
 	    tempEntry.setMilliseconds(timeInt);
 	    timeEntries_.push_back(tempEntry);
-		
+	    
+	    pastFirstIteration = true;
+	    
 	} // end while
   
     } // end if the fileStream isnt open
-  fileStream.close();
-  fileStream.clear();
-  
-  std::sort(cylinderList_.begin(), cylinderList_.end());
-  
+    fileStream.close();
+    fileStream.clear();
+    
+    std::sort(cylinderList_.begin(), cylinderList_.end());
+    return FILE_OK;
 }
 
 void newParser::DumpRaws()
@@ -143,6 +164,20 @@ void newParser::removeReturnCarraiges(std::string& subjectedStr)
     }
 		
 }
+
+
+bool newParser::isNumber(std::string str)
+{
+    for (std::string::iterator it = str.begin(); it != str.end(); ++it)
+    {
+	if (!std::isdigit(*it))
+	{
+	    return false;
+	}
+    }
+    return true;
+}
+
 
 void newParser::DumpCSVs()
 {

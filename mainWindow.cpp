@@ -71,8 +71,19 @@ void mainWindow::generateMenu()
 
 void mainWindow::aboutWindow()
 {
+    QString out;
+    out.reserve(200);
+    out = tr("The Moth Hamster Wheel is Brought to you by:\n");
+    out += tr("Coding: Daniel Fialkovsky,\nResearch: Thomson Paris\n\n");
+    out += tr("Icons by David Vignoni (david@icon-king.com)\n\n");
+    out += tr("Special THANKS to:\n");
+    out += tr("The Citrus Research and Development Foundation,\n");
+    out += tr("USDA ARS CMAVE,\n");
+    out += tr("University of Florida,\n");
+    out += tr("For supporting this project");
+
     QMessageBox::about(nullptr, tr("Credits"), 
-		       tr("The Moth Hamster Wheel is Brought to you by:\nDaniel Fialkovsky, Thomson Paris, USDA ARS Gainesville\n\nIcons by David Vignoni (david@icon-king.com)"));
+		       out);
 }
 
 void mainWindow::aboutQtWindow()
@@ -94,7 +105,12 @@ void mainWindow::openFile()
                                                  tr("text, csv (*.txt *.csv)"));
  
     newParser P;
-    P.processFile(fileName.toStdString());
+    std::pair<int, unsigned int> msg;
+    msg = P.processFile(fileName.toStdString());
+    
+    if(ifErrorsEvaluate(msg)) // if an error exists, send a QErrorMessage and return. 
+	return;
+    
     P.DumpRaws();
     
     QString folder = fileName;
@@ -109,6 +125,43 @@ void mainWindow::openFile()
 	QDesktopServices::openUrl(QUrl(folder));
     }
 }
+
+bool mainWindow::ifErrorsEvaluate(std::pair< int, unsigned int > msg)
+{
+    QString output;
+    switch(msg.first)
+    {
+	case newParser::FILE_OK:
+	    return false;
+	case newParser::ERR_1ENTRY_PER_LINE:
+	    output = tr("File is wrong!\nLine %1 has 1 entry when it needs two.").arg(msg.second);
+	    break;
+	case newParser::ERR_3PLUS_ENTRES_PER_LINE:
+	    output = tr("File is wrong!\nLine %1 has 3+ entries when it needs two.").arg(msg.second);
+	    break;
+	case newParser::ERR_MILLIS_SHRUNK:
+	    output.reserve(97);
+	    output = tr("File is wrong!\nLine %1 shows that the data went back in time\n").arg(msg.second);
+	    output += tr("When this never should have happened\n");
+	    break;
+	case newParser::ERR_TOXIC_CHARACTER:
+	    output = tr("File data is wrong!\nLine %1 has a non-number character\n(Use 0-9 (no '-'))").arg(msg.second);
+	    break;
+	case newParser::FILE_EMPTY:
+	    output = tr("The given file was empty");
+	    break;
+	default:
+	    output = tr("Unspecified error in file");
+	    break;
+    }
+    QErrorMessage* out = new QErrorMessage(this);
+    out->showMessage(output);
+    return true;
+
+    
+}
+
+
 
 void mainWindow::newSession()
 {
