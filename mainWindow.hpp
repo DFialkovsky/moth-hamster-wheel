@@ -82,7 +82,7 @@
 
 #include "newParser.hpp"
 #include <utility> // std::pair
-static const QString HAMSTER_VERSION = "0.1.2";
+static const QString HAMSTER_VERSION = "0.1.4";
 
 class mainWindow : public QMainWindow {
   
